@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coach Game Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;700&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    --bg: #16281f;
+    --panel: #1e372b;
+    --panel-raised: #24422f;
+    --paper: #f6efdc;
+    --ink: #f1ede0;
+    --ink-dim: #a9bdae;
+    --accent: #e7a63c;
+    --accent-ink: #16281f;
+    --accent-2: #6fae86;
+    --danger: #cf6144;
+    --border: rgba(241,237,224,0.22);
+    --chalk-shadow: rgba(0,0,0,0.35);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f3ecdb;
+      --panel: #ffffff;
+      --panel-raised: #fffaf0;
+      --paper: #ffffff;
+      --ink: #1c2e22;
+      --ink-dim: #5c6d61;
+      --accent: #c47f22;
+      --accent-ink: #fffaf0;
+      --accent-2: #2f7d54;
+      --danger: #b3492f;
+      --border: rgba(28,46,34,0.16);
+      --chalk-shadow: rgba(28,46,34,0.12);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #16281f;
+    --panel: #1e372b;
+    --panel-raised: #24422f;
+    --paper: #f6efdc;
+    --ink: #f1ede0;
+    --ink-dim: #a9bdae;
+    --accent: #e7a63c;
+    --accent-ink: #16281f;
+    --accent-2: #6fae86;
+    --danger: #cf6144;
+    --border: rgba(241,237,224,0.22);
+    --chalk-shadow: rgba(0,0,0,0.35);
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f3ecdb;
+    --panel: #ffffff;
+    --panel-raised: #fffaf0;
+    --paper: #ffffff;
+    --ink: #1c2e22;
+    --ink-dim: #5c6d61;
+    --accent: #c47f22;
+    --accent-ink: #fffaf0;
+    --accent-2: #2f7d54;
+    --danger: #b3492f;
+    --border: rgba(28,46,34,0.16);
+    --chalk-shadow: rgba(28,46,34,0.12);
+  }
+
+  * { box-sizing: inherit; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  body {
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+    display: flex;
+    justify-content: center;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 900px;
+    padding: 28px 20px 60px;
+  }
+
+  a, button, input { font-family: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---------- header ---------- */
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .greeting h1 {
+    font-family: 'Zilla Slab', Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(1.6rem, 4.2vw, 2.3rem);
+    margin: 0 0 4px;
+    line-height: 1.15;
+  }
+
+  .greeting p {
+    margin: 0;
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+  }
+
+  .top-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .clock {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(1.5rem, 5vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .icon-btn {
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .icon-btn:hover { background: var(--panel); }
+  .icon-btn:active { transform: scale(0.94); }
+
+  .top-icons { display: flex; gap: 8px; }
+
+  /* ---------- active board ---------- */
+  .board {
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 26px;
+    margin-bottom: 26px;
+    display: none;
+    align-items: center;
+    gap: 26px;
+    flex-wrap: wrap;
+  }
+  .board.showing { display: flex; }
+
+  .ring {
+    width: 168px;
+    height: 168px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) calc(var(--pct, 100) * 1%), var(--border) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.4s linear;
+  }
+  @media (prefers-reduced-motion: reduce) { .ring { transition: none; } }
+
+  .ring-inner {
+    width: 136px;
+    height: 136px;
+    border-radius: 50%;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ring-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.65rem;
+    font-weight: 700;
+  }
+  .ring-label {
+    font-size: 0.7rem;
+    color: var(--ink-dim);
+    margin-top: 4px;
+  }
+
+  .board-info { flex: 1; min-width: 200px; }
+  .board-info .eyebrow {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .board-info h2 {
+    font-family: 'Zilla Slab', Georgia, serif;
+    margin: 0 0 14px;
+    font-size: 1.5rem;
+  }
+
+  .board-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  button.pill {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink);
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  button.pill:hover { border-color: var(--accent); }
+
+  button.pill.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+  }
+  button.pill.primary:hover { filter: brightness(1.06); }
+
+  button.pill.danger { color: var(--danger); border-color: var(--danger); }
+  button.pill.danger:hover { background: var(--danger); color: var(--paper); }
+
+  /* ---------- add task ---------- */
+  form.add-task {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 26px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.8rem; color: var(--ink-dim); }
+  .field.grow { flex: 1; min-width: 180px; }
+
+  input[type="text"], input[type="number"] {
+    background: var(--paper);
+    color: #1c2e22;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    min-width: 0;
+  }
+  input[type="number"] { width: 96px; }
+
+  /* ---------- task list ---------- */
+  .plan-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+  .plan-heading h2 {
+    font-family: 'Zilla Slab', Georgia, serif;
+    font-size: 1.3rem;
+    margin: 0;
+  }
+  .plan-count { color: var(--ink-dim); font-size: 0.85rem; }
+
+  ul.task-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+
+  li.task {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  li.task.is-active { border-left-color: var(--accent); }
+  li.task.is-done { opacity: 0.6; border-left-color: var(--accent-2); }
+
+  .task-num {
+    font-family: 'Space Mono', monospace;
+    color: var(--ink-dim);
+    font-size: 0.85rem;
+    width: 26px;
+    flex-shrink: 0;
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+  .task-name {
+    font-weight: 600;
+    margin: 0 0 2px;
+    word-break: break-word;
+  }
+  li.task.is-done .task-name { text-decoration: line-through; }
+  .task-meta { color: var(--ink-dim); font-size: 0.82rem; }
+
+  .task-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  button.mini {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--ink);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  button.mini:hover { border-color: var(--accent); }
+  button.mini:disabled { opacity: 0.35; cursor: not-allowed; }
+  button.mini.ghost-danger { color: var(--danger); }
+
+  .empty {
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--ink-dim);
+  }
+  .empty strong { color: var(--ink); display: block; margin-bottom: 6px; font-family: 'Zilla Slab', Georgia, serif; font-size: 1.1rem; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 12px);
+    background: var(--panel-raised);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.showing { opacity: 1; transform: translate(-50%, 0); }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+  @media (max-width: 520px) {
+    header.top { flex-direction: column; }
+    .top-controls { align-items: flex-start; width: 100%; }
+    .board { padding: 18px; }
+    li.task { flex-wrap: wrap; }
+    .task-actions { width: 100%; justify-content: flex-end; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="greeting">
+      <h1 id="greeting">Good day, David</h1>
+      <p id="dateLine"></p>
+    </div>
+    <div class="top-controls">
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="top-icons">
+        <button class="icon-btn" id="voiceToggle" type="button" title="Toggle coach's voice" aria-label="Toggle coach's voice">🔊</button>
+        <button class="icon-btn" id="themeToggle" type="button" title="Flip the board" aria-label="Flip light and dark board">🌓</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="board" id="board">
+    <div class="ring" id="ring" style="--pct:100">
+      <div class="ring-inner">
+        <div class="ring-time" id="ringTime">00:00</div>
+        <div class="ring-label">left on the clock</div>
+      </div>
+    </div>
+    <div class="board-info">
+      <p class="eyebrow">On the clock</p>
+      <h2 id="activeName">—</h2>
+      <div class="board-actions">
+        <button class="pill" id="pauseBtn" type="button">Pause</button>
+        <button class="pill primary" id="doneBtn" type="button">Mark done</button>
+        <button class="pill danger" id="cancelBtn" type="button">Cancel</button>
+      </div>
+    </div>
+  </section>
+
+  <form class="add-task" id="addForm">
+    <div class="field grow">
+      <label for="taskName">What are you working on?</label>
+      <input type="text" id="taskName" placeholder="e.g. Revise data structures notes" maxlength="80" required>
+    </div>
+    <div class="field">
+      <label for="taskMinutes">Minutes</label>
+      <input type="number" id="taskMinutes" min="1" max="600" value="25" required>
+    </div>
+    <button class="pill primary" type="submit">Add to the plan</button>
+  </form>
+
+  <div class="plan-heading">
+    <h2>Today's game plan</h2>
+    <span class="plan-count" id="planCount"></span>
+  </div>
+
+  <ul class="task-list" id="taskList"></ul>
+
+  <div class="empty" id="emptyState" style="display:none;">
+    <strong>Your board is clear.</strong>
+    Add the first thing you want to get done today, give it some minutes, and hit start when you're ready.
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORE_TASKS = "gameplan_tasks_v1";
+  var STORE_VOICE = "gameplan_voice_v1";
+  var STORE_THEME = "gameplan_theme_v1";
+  var STORE_ACTIVE = "gameplan_active_v1";
+
+  var els = {
+    greeting: document.getElementById("greeting"),
+    dateLine: document.getElementById("dateLine"),
+    clock: document.getElementById("clock"),
+    voiceToggle: document.getElementById("voiceToggle"),
+    themeToggle: document.getElementById("themeToggle"),
+    board: document.getElementById("board"),
+    ring: document.getElementById("ring"),
+    ringTime: document.getElementById("ringTime"),
+    activeName: document.getElementById("activeName"),
+    pauseBtn: document.getElementById("pauseBtn"),
+    doneBtn: document.getElementById("doneBtn"),
+    cancelBtn: document.getElementById("cancelBtn"),
+    addForm: document.getElementById("addForm"),
+    taskName: document.getElementById("taskName"),
+    taskMinutes: document.getElementById("taskMinutes"),
+    taskList: document.getElementById("taskList"),
+    planCount: document.getElementById("planCount"),
+    emptyState: document.getElementById("emptyState"),
+    toast: document.getElementById("toast")
+  };
+
+  var tasks = [];
+  var voiceEnabled = true;
+  var tickHandle = null;
+  var toastHandle = null;
+
+  /* ---------- storage helpers ---------- */
+  function safeGet(key) {
+    try { return window.localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function safeSet(key, value) {
+    try { window.localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  }
+
+  function loadTasks() {
+    var raw = safeGet(STORE_TASKS);
+    if (!raw) return [];
+    try {
+      var parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+  }
+  function saveTasks() { safeSet(STORE_TASKS, JSON.stringify(tasks)); }
+
+  function loadActive() {
+    var raw = safeGet(STORE_ACTIVE);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch (e) { return null; }
+  }
+  function saveActive(state) { safeSet(STORE_ACTIVE, state ? JSON.stringify(state) : ""); }
+
+  /* ---------- theme ---------- */
+  function applyTheme(theme) {
+    if (theme === "dark" || theme === "light") {
+      document.documentElement.setAttribute("data-theme", theme);
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  }
+  (function initTheme() {
+    var stored = safeGet(STORE_THEME);
+    applyTheme(stored);
+  })();
+  els.themeToggle.addEventListener("click", function () {
+    var current = document.documentElement.getAttribute("data-theme");
+    var prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    var effectiveCurrent = current || (prefersLight ? "light" : "dark");
+    var next = effectiveCurrent === "dark" ? "light" : "dark";
+    applyTheme(next);
+    safeSet(STORE_THEME, next);
+  });
+
+  /* ---------- voice ---------- */
+  (function initVoice() {
+    var stored = safeGet(STORE_VOICE);
+    voiceEnabled = stored === null ? true : stored === "1";
+    els.voiceToggle.textContent = voiceEnabled ? "🔊" : "🔇";
+  })();
+  els.voiceToggle.addEventListener("click", function () {
+    voiceEnabled = !voiceEnabled;
+    els.voiceToggle.textContent = voiceEnabled ? "🔊" : "🔇";
+    safeSet(STORE_VOICE, voiceEnabled ? "1" : "0");
+    if (!voiceEnabled && "speechSynthesis" in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+  });
+
+  function speak(text) {
+    if (!voiceEnabled) return;
+    if (!("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.96;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- notifications ---------- */
+  function notify(title, body) {
+    try {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "granted") {
+        new Notification(title, { body: body });
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(function (perm) {
+          if (perm === "granted") new Notification(title, { body: body });
+        });
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- beep ---------- */
+  function beep(freq, duration) {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      var ctx = new Ctx();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration / 1000);
+      osc.start();
+      osc.stop(ctx.currentTime + duration / 1000 + 0.03);
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- toast ---------- */
+  function showToast(msg) {
+    els.toast.textContent = msg;
+    els.toast.classList.add("showing");
+    if (toastHandle) clearTimeout(toastHandle);
+    toastHandle = setTimeout(function () {
+      els.toast.classList.remove("showing");
+    }, 3200);
+  }
+
+  /* ---------- clock + greeting ---------- */
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+  function updateClock() {
+    var now = new Date();
+    els.clock.textContent = pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+  }
+
+  function updateGreetingAndDate() {
+    var now = new Date();
+    var hour = now.getHours();
+    var word = hour < 12 ? "morning" : (hour < 17 ? "afternoon" : "evening");
+    els.greeting.textContent = "Good " + word + ", David";
+    try {
+      els.dateLine.textContent = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    } catch (e) {
+      els.dateLine.textContent = now.toDateString();
+    }
+  }
+
+  /* ---------- duration phrasing ---------- */
+  function phraseMinutes(mins) {
+    if (mins >= 60) {
+      var hours = mins / 60;
+      var rounded = Math.round(hours * 10) / 10;
+      return rounded === 1 ? "1 hour" : rounded + " hours";
+    }
+    return mins === 1 ? "1 minute" : mins + " minutes";
+  }
+
+  function fmtClock(totalSeconds) {
+    var s = Math.max(0, totalSeconds);
+    var h = Math.floor(s / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    var sec = s % 60;
+    if (h > 0) return h + ":" + pad(m) + ":" + pad(sec);
+    return pad(m) + ":" + pad(sec);
+  }
+
+  /* ---------- task model ---------- */
+  function findTask(id) {
+    for (var i = 0; i < tasks.length; i++) if (tasks[i].id === id) return tasks[i];
+    return null;
+  }
+
+  function activeTask() {
+    for (var i = 0; i < tasks.length; i++) if (tasks[i].status === "active") return tasks[i];
+    return null;
+  }
+
+  function render() {
+    els.taskList.innerHTML = "";
+    var pendingOrDone = tasks.filter(function (t) { return t.status !== "active"; });
+    var num = 1;
+
+    if (tasks.length === 0) {
+      els.emptyState.style.display = "block";
+    } else {
+      els.emptyState.style.display = "none";
+    }
+
+    var doneCount = tasks.filter(function (t) { return t.status === "done"; }).length;
+    els.planCount.textContent = tasks.length ? (doneCount + " of " + tasks.length + " done") : "";
+
+    tasks.forEach(function (t) {
+      var li = document.createElement("li");
+      li.className = "task" + (t.status === "active" ? " is-active" : "") + (t.status === "done" ? " is-done" : "");
+
+      var numEl = document.createElement("span");
+      numEl.className = "task-num";
+      numEl.textContent = pad(num);
+      num++;
+
+      var body = document.createElement("div");
+      body.className = "task-body";
+      var name = document.createElement("p");
+      name.className = "task-name";
+      name.textContent = t.name;
+      var meta = document.createElement("p");
+      meta.className = "task-meta";
+      meta.textContent = t.status === "done" ? "Done · " + phraseMinutes(t.minutes) : (t.status === "active" ? "On the clock · " + phraseMinutes(t.minutes) : phraseMinutes(t.minutes));
+      body.appendChild(name);
+      body.appendChild(meta);
+
+      var actions = document.createElement("div");
+      actions.className = "task-actions";
+
+      if (t.status === "pending") {
+        var startBtn = document.createElement("button");
+        startBtn.className = "mini";
+        startBtn.type = "button";
+        startBtn.textContent = "Start";
+        var anyActive = !!activeTask();
+        startBtn.disabled = anyActive;
+        startBtn.addEventListener("click", function () { startTask(t.id); });
+        actions.appendChild(startBtn);
+
+        var delBtn = document.createElement("button");
+        delBtn.className = "mini ghost-danger";
+        delBtn.type = "button";
+        delBtn.textContent = "Remove";
+        delBtn.addEventListener("click", function () { deleteTask(t.id); });
+        actions.appendChild(delBtn);
+      } else if (t.status === "done") {
+        var delBtn2 = document.createElement("button");
+        delBtn2.className = "mini ghost-danger";
+        delBtn2.type = "button";
+        delBtn2.textContent = "Remove";
+        delBtn2.addEventListener("click", function () { deleteTask(t.id); });
+        actions.appendChild(delBtn2);
+      }
+
+      li.appendChild(numEl);
+      li.appendChild(body);
+      li.appendChild(actions);
+      els.taskList.appendChild(li);
+    });
+
+    renderBoard();
+  }
+
+  function renderBoard() {
+    var t = activeTask();
+    if (!t) {
+      els.board.classList.remove("showing");
+      saveActive(null);
+      return;
+    }
+    els.board.classList.add("showing");
+    els.activeName.textContent = t.name;
+    els.pauseBtn.textContent = t.paused ? "Resume" : "Pause";
+  }
+
+  /* ---------- timer engine ---------- */
+  function tick() {
+    var t = activeTask();
+    if (!t || t.paused) return;
+    var remaining = Math.round((t.endTime - Date.now()) / 1000);
+    if (remaining <= 0) {
+      completeTask(t.id);
+      return;
+    }
+    var pct = Math.max(0, Math.min(100, (remaining / (t.minutes * 60)) * 100));
+    els.ring.style.setProperty("--pct", pct.toFixed(2));
+    els.ringTime.textContent = fmtClock(remaining);
+    saveActive({ id: t.id, endTime: t.endTime, remaining: remaining, paused: false });
+  }
+
+  function ensureTicking() {
+    if (tickHandle) return;
+    tickHandle = setInterval(tick, 1000);
+  }
+  function stopTicking() {
+    if (tickHandle) { clearInterval(tickHandle); tickHandle = null; }
+  }
+
+  function startTask(id) {
+    if (activeTask()) return;
+    var t = findTask(id);
+    if (!t) return;
+    t.status = "active";
+    t.paused = false;
+    t.remaining = t.minutes * 60;
+    t.endTime = Date.now() + t.remaining * 1000;
+    saveTasks();
+    render();
+    tick();
+    ensureTicking();
+
+    notify("Coach's whistle", "Time to start: " + t.name + " — " + phraseMinutes(t.minutes) + ".");
+    speak("Coach David, it's time to " + t.name + " for " + phraseMinutes(t.minutes) + ".");
+    beep(880, 130);
+  }
+
+  function completeTask(id) {
+    var t = findTask(id);
+    if (!t) return;
+    t.status = "done";
+    t.paused = false;
+    delete t.endTime;
+    delete t.remaining;
+    stopTicking();
+    saveTasks();
+    render();
+
+    notify("Coach's whistle", "Time's up — you finished " + t.name + ".");
+    speak("Coach David, time's up! You just finished " + t.name + ". Nice work.");
+    beep(660, 170);
+    setTimeout(function () { beep(990, 170); }, 200);
+    showToast("Logged: " + t.name);
+  }
+
+  function togglePause() {
+    var t = activeTask();
+    if (!t) return;
+    if (t.paused) {
+      t.endTime = Date.now() + t.remaining * 1000;
+      t.paused = false;
+      ensureTicking();
+    } else {
+      t.remaining = Math.max(0, Math.round((t.endTime - Date.now()) / 1000));
+      t.paused = true;
+      stopTicking();
+    }
+    saveTasks();
+    renderBoard();
+  }
+
+  function markDoneNow() {
+    var t = activeTask();
+    if (!t) return;
+    completeTask(t.id);
+  }
+
+  function cancelActive() {
+    var t = activeTask();
+    if (!t) return;
+    var ok = window.confirm("Send \"" + t.name + "\" back to the plan?");
+    if (!ok) return;
+    t.status = "pending";
+    t.paused = false;
+    delete t.endTime;
+    delete t.remaining;
+    stopTicking();
+    saveTasks();
+    render();
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(function (t) { return t.id !== id; });
+    saveTasks();
+    render();
+  }
+
+  /* ---------- form ---------- */
+  els.addForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = els.taskName.value.trim();
+    var minutes = parseInt(els.taskMinutes.value, 10);
+    if (!name || !minutes || minutes < 1) return;
+    tasks.push({ id: "t" + Date.now() + Math.floor(Math.random() * 1000), name: name, minutes: minutes, status: "pending", paused: false });
+    saveTasks();
+    els.taskName.value = "";
+    els.taskMinutes.value = "25";
+    els.taskName.focus();
+    render();
+  });
+
+  els.pauseBtn.addEventListener("click", togglePause);
+  els.doneBtn.addEventListener("click", markDoneNow);
+  els.cancelBtn.addEventListener("click", cancelActive);
+
+  /* ---------- boot ---------- */
+  tasks = loadTasks();
+
+  (function resumeActiveIfAny() {
+    var t = activeTask();
+    if (!t) return;
+    if (t.paused) return;
+    if (typeof t.endTime !== "number") {
+      t.status = "pending";
+      return;
+    }
+    if (t.endTime <= Date.now()) {
+      completeTask(t.id);
+    } else {
+      ensureTicking();
+    }
+  })();
+
+  updateClock();
+  updateGreetingAndDate();
+  setInterval(updateClock, 1000);
+  setInterval(updateGreetingAndDate, 60000);
+  render();
+  tick();
+})();
+</script>
+</body>
+</html>
